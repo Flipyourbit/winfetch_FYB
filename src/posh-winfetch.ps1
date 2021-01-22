@@ -1,8 +1,14 @@
 #!/usr/bin/env pwsh
 #requires -version 5
-
+#
+#   This is a fork created and maintained by Stephen Preston and contributers
+#
 # The MIT License (MIT)
 # Copyright (c) 2019 Kied Llaentenn and contributers
+#
+#
+# 
+#
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +27,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+
 
 <#PSScriptInfo
 .VERSION 1.2.1
@@ -70,15 +78,6 @@ $e = [char]0x1B
 
 $is_pscore = $PSVersionTable.PSEdition.ToString() -eq 'Core'
 
-$configdir = $env:XDG_CONFIG_HOME, "${env:USERPROFILE}\.config" | Select-Object -First 1
-$configPath = "${configdir}/winfetch/config.ps1"
-
-$defaultconfig = 'https://raw.githubusercontent.com/lptstr/winfetch/master/lib/config.ps1'
-
-# ensure configuration directory exists
-if (-not (Test-Path -Path $configPath)) {
-    [void](New-Item -Path $configPath -Force)
-}
 
 # ===== DISPLAY HELP =====
 if ($help) {
@@ -90,17 +89,6 @@ if ($help) {
     exit 0
 }
 
-# ===== GENERATE CONFIGURATION =====
-if ($genconf) {
-    if ((Get-Item -Path $configPath).Length -gt 0) {
-        Write-Host 'ERROR: configuration file already exists!' -f red
-        exit 1
-    }
-    Write-Output "INFO: downloading default config to '$configPath'."
-    Invoke-WebRequest -Uri $defaultconfig -OutFile $configPath -UseBasicParsing
-    Write-Output 'INFO: successfully completed download.'
-    exit 0
-}
 
 
 # ===== VARIABLES =====
@@ -108,7 +96,7 @@ $cimSession = New-CimSession
 
 
 # ===== CONFIGURATION =====
-$baseConfig = @(
+$config = @(
     "title"
     "dashes"
     "os"
@@ -126,41 +114,27 @@ $baseConfig = @(
     "colorbar"
 )
 
-if ((Get-Item -Path $configPath).Length -gt 0) {
-    $config = . $configPath
-} else {
-    $config = $baseConfig
-}
-
-# convert old config style
-if ($config.GetType() -eq [string]) {
-    $oldConfig = $config.ToLower()
-    $config = $baseConfig | Where-Object { $oldConfig.Contains($_) }
-    $config += @("blank", "colorbar")
-}
-
-
 # ===== IMAGE =====
 $img = if (-not $image -and -not $noimage) {
     @(
-        "${e}[1;34m                    ....,,:;+ccllll${e}[0m"
-        "${e}[1;34m      ...,,+:;  cllllllllllllllllll${e}[0m"
-        "${e}[1;34m,cclllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34m                                   ${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34mllllllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34m``'ccllllllllll  lllllllllllllllllll${e}[0m"
-        "${e}[1;34m      ``' \\*::  :ccllllllllllllllll${e}[0m"
-        "${e}[1;34m                       ````````''*::cll${e}[0m"
-        "${e}[1;34m                                 ````${e}[0m"
+        "${e}[1;32m                    ....,,:;+ccllll${e}[0m"
+        "${e}[1;32m      ...,,+:;  cllllllllllllllllll${e}[0m"
+        "${e}[1;32m,cclllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32m                                   ${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32mllllllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32m``'ccllllllllll  lllllllllllllllllll${e}[0m"
+        "${e}[1;32m      ``' \\*::  :ccllllllllllllllll${e}[0m"
+        "${e}[1;32m                       ````````''*::cll${e}[0m"
+        "${e}[1;32m                                 ````${e}[0m"
     )
 }
 elseif (-not $noimage -and $image) {
@@ -250,7 +224,7 @@ function info_os {
 function info_title {
     return @{
         title   = ""
-        content = "${e}[1;34m{0}${e}[0m@${e}[1;34m{1}${e}[0m" -f [Environment]::UserName,$env:COMPUTERNAME
+        content = "${e}[1;32m{0}${e}[0m@${e}[1;32m{1}${e}[0m" -f [Environment]::UserName,$env:COMPUTERNAME
     }
 }
 
@@ -269,18 +243,22 @@ function info_dashes {
 function info_computer {
     $compsys = Get-CimInstance -ClassName Win32_ComputerSystem -Property Manufacturer,Model -CimSession $cimSession
     return @{
-        title   = "Host"
+        title   = "Platform"
         content = '{0} {1}' -f $compsys.Manufacturer, $compsys.Model
     }
 }
 
+
+# Stephen to update
 
 # ===== KERNEL =====
 function info_kernel {
     return @{
         title   = "Kernel"
         content = if ($IsWindows -or $PSVersionTable.PSVersion.Major -eq 5) {
-            "$([System.Environment]::OSVersion.Version)"
+        #revised code displays revision number b since it was never added to Env variable  or WMI this be pulled from the registery
+        "$([System.Environment]::OSVersion.Version.Major)"  + "." + "$([System.Environment]::OSVersion.Version.Minor)"  + "." +  ($(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion' CurrentBuild).CurrentBuild) + "." +  ($(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion' UBR).UBR)
+       
         } else {
             "$(uname -r)"
         }
@@ -394,6 +372,7 @@ function info_pwsh {
 
 
 # ===== PACKAGES =====
+# find another function
 function info_pkgs {
     $chocopkg = if (Get-Command -Name choco -ErrorAction Ignore) {
         (& clist -l)[-1].Split(' ')[0] - 1
@@ -413,7 +392,7 @@ function info_pkgs {
     }) -join ', '
 
     return @{
-        title   = "Packages"
+        title   = "powershell-core"
         content = $pkgs
     }
 }
@@ -429,7 +408,7 @@ foreach ($line in $img) {
 
 # move cursor to top of image and to column 40
 if ($img) {
-    Write-Host -NoNewLine "$e[$($img.Length)A$e[40G"
+    Write-Host -NoNewLine "$e[$($img.Length)A$e[40G" 
 }
 
 # write info
@@ -444,7 +423,7 @@ foreach ($item in $config) {
         continue
     }
 
-    $output = "$e[1;34m$($info.title)$e[0m"
+    $output = "$e[1;32m$($info.title)$e[0m"
 
     if ($info.title -and $info.content) {
         $output += ": "
