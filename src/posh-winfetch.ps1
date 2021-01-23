@@ -51,10 +51,6 @@
     Winfetch - Neofetch for Windows in PowerShell 5+
 .DESCRIPTION
     Winfetch is a command-line system information utility for Windows written in PowerShell.
-.PARAMETER image
-    Display a pixelated image instead of the usual logo. Imagemagick required.
-.PARAMETER genconf
-    Download a configuration template. Internet connection required.
 .PARAMETER noimage
     Do not display any image or logo; display information only.
 .PARAMETER help
@@ -68,8 +64,6 @@
 #>
 [CmdletBinding()]
 param(
-    [string][alias('i')]$image,
-    [switch][alias('g')]$genconf,
     [switch][alias('n')]$noimage,
     [switch][alias('h')]$help
 )
@@ -137,57 +131,6 @@ $img = if (-not $image -and -not $noimage) {
         "${e}[1;32m                                 ````${e}[0m"
     )
 }
-elseif (-not $noimage -and $image) {
-    if (-not (Get-Command -Name magick -ErrorAction Ignore)) {
-        Write-Host 'ERROR: Imagemagick must be installed to print custom images.' -f red
-        Write-Host 'hint: if you have Scoop installed, try `scoop install imagemagick`.' -f yellow
-        exit 1
-    }
-
-    $COLUMNS = 35
-    $CURR_ROW = ""
-    $CHAR = [Text.Encoding]::UTF8.GetString(@(226, 150, 128)) # 226,150,136
-    $upper, $lower = @(), @()
-
-    if ($image -eq 'wallpaper') {
-        $image = (Get-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name Wallpaper).Wallpaper
-    }
-    if (-not (Test-Path -path $image)) {
-        Write-Host 'ERROR: Specified image or wallpaper does not exist.' -f red
-        exit 1
-    }
-    $pixels = @((magick convert -thumbnail "${COLUMNS}x" -define txt:compliance=SVG $image txt:-).Split("`n"))
-    foreach ($pixel in $pixels) {
-        $coord = [regex]::Match($pixel, "([0-9])+,([0-9])+:").Value.TrimEnd(":") -split ','
-        $col, $row = $coord[0, 1]
-
-        $rgba = [regex]::Match($pixel, "\(([0-9])+,([0-9])+,([0-9])+,([0-9])+\)").Value.TrimStart("(").TrimEnd(")").Split(",")
-        $r, $g, $b = $rgba[0, 1, 2]
-
-        if (($row % 2) -eq 0) {
-            $upper += "${r};${g};${b}"
-        } else {
-            $lower += "${r};${g};${b}"
-        }
-
-        if (($row % 2) -eq 1 -and $col -eq ($COLUMNS - 1)) {
-            $i = 0
-            while ($i -lt $COLUMNS) {
-                $CURR_ROW += "${e}[38;2;$($upper[$i]);48;2;$($lower[$i])m${CHAR}"
-                $i++
-            }
-            "${CURR_ROW}${e}[0m"
-
-            $CURR_ROW = ""
-            $upper = @()
-            $lower = @()
-        }
-    }
-}
-else {
-    @()
-}
-
 
 # ===== BLANK =====
 function info_blank {
@@ -392,7 +335,7 @@ function info_pkgs {
     }) -join ', '
 
     return @{
-        title   = "powershell-core"
+        title   = "Packages"
         content = $pkgs
     }
 }
