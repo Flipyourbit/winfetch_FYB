@@ -87,17 +87,19 @@ if ($help) {
 
 # ===== VARIABLES =====
 $cimSession = New-CimSession
-
+$hypervdata = Get-ItemProperty -path 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters' -ErrorAction SilentlyContinue
 
 # ===== CONFIGURATION =====
 $config = @(
     "title"
     "dashes"
     "os"
-    "computer"
+    "platform"
     "kernel"
     "uptime"
-    "pkgs"
+    "lastreboot"
+    "hypervhost"
+    "vmnameonhost"
     "pwsh"
     "terminal"
     "cpu"
@@ -135,13 +137,13 @@ $img = if (-not $image -and -not $noimage) {
 # ===== BLANK =====
 function info_blank {
     return @{}
-}
+} 170
 
 
 # ===== COLORBAR =====
 function info_colorbar {
     return @{
-        title   = ""
+       #< title   = ""
         content = ('{0}[0;40m{1}{0}[0;41m{1}{0}[0;42m{1}{0}[0;43m{1}' +
             '{0}[0;44m{1}{0}[0;45m{1}{0}[0;46m{1}{0}[0;47m{1}' +
             '{0}[0m') -f $e, '   '
@@ -182,8 +184,9 @@ function info_dashes {
 }
 
 
-# ===== COMPUTER =====
-function info_computer {
+$hypervdata = Get-ItemProperty -path 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters' -ErrorAction SilentlyContinue
+# ===== platform =====
+function info_platform {
     $compsys = Get-CimInstance -ClassName Win32_ComputerSystem -Property Manufacturer,Model -CimSession $cimSession
     return @{
         title   = "Platform"
@@ -226,7 +229,7 @@ function info_uptime {
 
 
 # ===== TERMINAL =====
-# this section works by getting the parent processes of the current powershell instance.
+# this section works by getting tlastrbthe parent processes of the current powershell instance.
 function info_terminal {
     if (-not $is_pscore) {
         $parent = Get-Process -Id (Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $PID" -Property ParentProcessId -CimSession $cimSession).ParentProcessId
@@ -314,32 +317,39 @@ function info_pwsh {
 }
 
 
-# ===== PACKAGES =====
+# ===== last Reboot =====
 # find another function
-function info_pkgs {
-    $chocopkg = if (Get-Command -Name choco -ErrorAction Ignore) {
-        (& clist -l)[-1].Split(' ')[0] - 1
-    }
-
-    $scooppkg = if (Get-Command -Name scoop -ErrorAction Ignore) {
-        $scoop = & scoop which scoop
-        $scoopdir = (Resolve-Path "$(Split-Path -Path $scoop)\..\..\..").Path
-        (Get-ChildItem -Path $scoopdir -Directory).Count - 1
-    }
-
-    $pkgs = $(if ($scooppkg) {
-        "$scooppkg (scoop)"
-    }
-    if ($chocopkg) {
-        "$chocopkg (choco)"
-    }) -join ', '
-
+function info_lastreboot {
     return @{
-        title   = "Packages"
-        content = $pkgs
+        title   = "Last Reboot"
+        content =  (Get-CimInstance -ClassName Win32_OperatingSystem -Property LastBootUpTime -CimSession $cimSession).LastBootUpTime
     }
 }
 
+# ===== Hyper-V host =====
+function info_hypervhost {
+    #Place logic if not on Hyper-V host
+    if($null -ne $hypervdata){
+        $vmhostdata =  ($hypervdata).HostName
+     }
+     else {$vmhostdata = "NA"}
+    return @{
+        title   = "Hyper-V Host"
+        content = $vmhostdata 
+    }
+}
+# ===== VMname on Hyper-V host =====
+function info_vmnameonhost {
+    #Place logic if not on Hyper-V host
+    if($null -ne $hypervdata){
+       $hostdata =  ($hypervdata).virtualmachinename
+    }
+    else {$hostdata = "NA"}
+    return @{
+        title   = "VMName"
+        content = $hostdata 
+    }
+}
 
 # reset terminal sequences and display a newline
 Write-Host "$e[0m"
@@ -389,6 +399,7 @@ if ($img) {
 
 # print 2 newlines
 Write-Host "`n"
+
 
 #  ___ ___  ___
 # | __/ _ \| __|
