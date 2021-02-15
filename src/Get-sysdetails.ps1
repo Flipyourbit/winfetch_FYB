@@ -33,15 +33,15 @@
 <#PSScriptInfo
 .VERSION 1.2.1
 .GUID 1c26142a-da43-4125-9d70-97555cbb1752
-.DESCRIPTION This powershell script is based on Winfetch a command-line system information utility for Windows written in PowerShell.
-.AUTHOR lptstr, froked by Stephen Preston as get-sysdetails
-.PROJECTURI https://github.com/Flipyourbit/winfetch_FYB  forked from  https://github.com/lptstr/winfetch
+.DESCRIPTION This powershell script is based on Winfetch a command-line system information utility for Windows written in PowerShell. This was forked from URL: https://github.com/lptstr/winfetch Author: lptstr
+.AUTHOR Stephen Preston
+.PROJECTURI https://github.com/Flipyourbit/winfetch_FYB  
 .COMPANYNAME
 .COPYRIGHT
 .TAGS
 .LICENSEURI
 .ICONURI
-.EXTERNALMODULEDEPENDENCIES
+.EXTERNALMODULEDEPENDENCIESforked 
 .REQUIREDSCRIPTS
 .EXTERNALSCRIPTDEPENDENCIES
 .RELEASENOTES
