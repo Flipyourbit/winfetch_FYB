@@ -33,9 +33,9 @@
 <#PSScriptInfo
 .VERSION 1.2.1
 .GUID 1c26142a-da43-4125-9d70-97555cbb1752
-.DESCRIPTION Winfetch is a command-line system information utility for Windows written in PowerShell.
-.AUTHOR lptstr
-.PROJECTURI https://github.com/lptstr/winfetch
+.DESCRIPTION This powershell script is based on Winfetch a command-line system information utility for Windows written in PowerShell.
+.AUTHOR lptstr, froked by Stephen Preston as get-sysdetails
+.PROJECTURI https://github.com/Flipyourbit/winfetch_FYB  forked from  https://github.com/lptstr/winfetch
 .COMPANYNAME
 .COPYRIGHT
 .TAGS
@@ -402,7 +402,7 @@ Write-Host "`n"
 
 
 #  ___ ___  ___
-# | __/ _ \| __|
+# | __/ _ \| __| https://
 # | _| (_) | _|
 # |___\___/|_|
 #
