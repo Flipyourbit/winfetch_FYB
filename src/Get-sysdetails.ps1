@@ -32,7 +32,7 @@
 
 
 <#PSScriptInfo
-.VERSION 1.2.1
+.VERSION 1.2.3
 .GUID 1c26142a-da43-4125-9d70-97555cbb1752
 .DESCRIPTION This powershell script is based on Winfetch a command-line system information utility for Windows written in PowerShell. https://github.com/Flipyourbit/winfetch_FYB 
 .AUTHOR Stephen Preston
@@ -89,7 +89,8 @@ if ($help) {
 # ===== VARIABLES =====
 $cimSession = New-CimSession
 $hypervdata = Get-ItemProperty -path 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters' -ErrorAction SilentlyContinue
-
+$biosdata = Get-CimInstance -ClassName win32_bios -CimSession $cimSession
+$microcodedata = Get-ItemProperty -path 'Registry::HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0\' -ErrorAction SilentlyContinue
 # ===== CONFIGURATION =====
 $config = @(
     "title"
@@ -97,6 +98,11 @@ $config = @(
     "os"
     "platform"
     "kernel"
+    "biosver"
+    "mrcodeact"
+    "mrcodebios"
+    "manufacturer"
+    "serialnumber"
     "uptime"
     "lastreboot"
     "hypervhost"
@@ -196,14 +202,13 @@ function info_platform {
 }
 
 
-# Stephen to update
+
 
 # ===== KERNEL =====
 function info_kernel {
     return @{
         title   = "Kernel"
         content = if ($IsWindows -or $PSVersionTable.PSVersion.Major -eq 5) {
-        #revised code displays revision number b since it was never added to Env variable  or WMI this be pulled from the registery
         "$([System.Environment]::OSVersion.Version.Major)"  + "." + "$([System.Environment]::OSVersion.Version.Minor)"  + "." +  ($(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion' CurrentBuild).CurrentBuild) + "." +  ($(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion' UBR).UBR)
        
         } else {
@@ -230,7 +235,7 @@ function info_uptime {
 
 
 # ===== TERMINAL =====
-# this section works by getting tlastrbthe parent processes of the current powershell instance.
+# this section works by getting  parent processes of the current powershell instance.
 function info_terminal {
     if (-not $is_pscore) {
         $parent = Get-Process -Id (Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $PID" -Property ParentProcessId -CimSession $cimSession).ParentProcessId
@@ -268,7 +273,7 @@ function info_terminal {
 }
 
 
-# ===== CPU/GPU =====
+# ===== CPU/CPU Microcode/GPU =====
 function info_cpu {
     return @{
         title   = "CPU"
@@ -283,7 +288,42 @@ function info_gpu {
     }
 }
 
+function info_mrcodebios {
 
+
+    return @{
+        title   = "Microcode Bios"
+        content = "0x" +  (-join ( ($microcodedata.'previous update revision')[0..4] | ForEach-Object { $_.ToString("X2") } )).TrimStart('0')
+    }
+}
+function info_mrcodeact {
+
+    return @{
+        title   = "Microcode Active"
+        content = "0x" + (-join ( ($microcodedata."update revision")[0..4] | ForEach-Object { $_.ToString("X2") } )).TrimStart('0')
+    }
+}
+
+# ===== SN/BIOS/Manufacturer =====
+function info_biosver {
+    return @{
+        title   = "Bios Version"
+        content = $biosdata.SMBIOSBIOSVersion
+    }
+}
+
+function info_manufacturer {
+    return @{
+        title   = "Manufacturer"
+        content = $biosdata.Manufacturer
+    }
+}
+function info_serialnumber {
+    return @{
+        title   = "Serial Number"
+        content = $biosdata.SerialNumber
+    }
+}
 # ===== MEMORY =====
 function info_memory {
     $m = Get-CimInstance -ClassName Win32_OperatingSystem -Property TotalVisibleMemorySize,FreePhysicalMemory -CimSession $cimSession
@@ -315,11 +355,9 @@ function info_pwsh {
         title   = "Shell"
         content = "PowerShell v$($PSVersionTable.PSVersion)"
     }
-}
-
-
+} 
 # ===== last Reboot =====
-# find another function
+
 function info_lastreboot {
     return @{
         title   = "Last Reboot"
@@ -403,7 +441,7 @@ Write-Host "`n"
 
 
 #  ___ ___  ___
-# | __/ _ \| __| https://
+# | __/ _ \| __| 
 # | _| (_) | _|
 # |___\___/|_|
 #
