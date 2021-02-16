@@ -2,6 +2,7 @@
 #requires -version 5
 #
 #   This is a fork created and maintained by Stephen Preston and contributers
+#  This was forked from URL: https://github.com/lptstr/winfetch Author: lptstr
 #
 # The MIT License (MIT)
 # Copyright (c) 2019 Kied Llaentenn and contributers
@@ -33,7 +34,7 @@
 <#PSScriptInfo
 .VERSION 1.2.1
 .GUID 1c26142a-da43-4125-9d70-97555cbb1752
-.DESCRIPTION This powershell script is based on Winfetch a command-line system information utility for Windows written in PowerShell. This was forked from URL: https://github.com/lptstr/winfetch Author: lptstr
+.DESCRIPTION This powershell script is based on Winfetch a command-line system information utility for Windows written in PowerShell. https://github.com/Flipyourbit/winfetch_FYB 
 .AUTHOR Stephen Preston
 .PROJECTURI https://github.com/Flipyourbit/winfetch_FYB  
 .COMPANYNAME
