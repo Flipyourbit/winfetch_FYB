@@ -1,4 +1,4 @@
-# This Can be installed using the powershell Gallery as well
+# powershell Gallery Install
 https://www.powershellgallery.com/packages/Get-sysdetails
 
 
