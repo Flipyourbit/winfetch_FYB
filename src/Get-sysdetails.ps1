@@ -49,9 +49,9 @@
 #>
 <#
 .SYNOPSIS
-    Winfetch - Neofetch for Windows in PowerShell 5+
+    Get-sysdetails - is a fork of winfetch modified for more server, Winfetch is  Neofetch for Windows in PowerShell 5+
 .DESCRIPTION
-    Winfetch is a command-line system information utility for Windows written in PowerShell.
+     Get-sysdetails is a command-line system information utility for Windows written in PowerShell.
 .PARAMETER noimage
     Do not display any image or logo; display information only.
 .PARAMETER help
